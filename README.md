@@ -43,6 +43,10 @@ func main() {
 - When querying with identity credentials (TCKN), you will receive the firstName and lastName fields, but the title (unvan) field will not be present.
 - When querying with a tax number (VKN), the title (unvan) field will be returned instead of the firstName and lastName fields.
 
+## Documentation
+
+For detailed documentation, you can visit the [here](https://pkg.go.dev/github.com/9ssi7/vkn).
+
 ## License
 
 This library is licensed under the MIT license. For more information, see the LICENSE file.
