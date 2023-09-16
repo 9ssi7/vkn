@@ -1,4 +1,4 @@
-module github.com/ssibrahimbas/vkn
+module github.com/9ssi7/vkn
 
 go 1.20
 
