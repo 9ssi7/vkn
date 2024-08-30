@@ -35,6 +35,13 @@ func main() {
         return
     }
     fmt.Println(data) // {FirstName: "John", LastName: "Doe", Title: "Company Name", TaxOffice: "Tax Office Name"}
+
+
+    // close the client after use
+    if err := client.Logout(context.Background()); err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
 }
 ```
 

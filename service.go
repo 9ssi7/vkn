@@ -24,6 +24,26 @@ func New(cnf Config) Vkn {
 	}
 }
 
+func (s *srv) Logout(ctx context.Context) error {
+	if s.token == "" {
+		return nil
+	}
+	data := url.Values{}
+	data.Set("assoscmd", "logout")
+	data.Set("rtype", "json")
+	data.Set("token", s.token)
+	client := &http.Client{}
+	r, _ := http.NewRequestWithContext(ctx, "POST", "https://earsivportal.efatura.gov.tr/earsiv-services/assos-login", bytes.NewBufferString(data.Encode()))
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(r)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	s.token = ""
+	return nil
+}
+
 func (s *srv) Login(ctx context.Context) error {
 	data := url.Values{}
 	data.Set("assoscmd", "anologin")
@@ -44,7 +64,7 @@ func (s *srv) Login(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	var result loginResponse
+	var result *loginResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return err
 	}

@@ -6,7 +6,12 @@ import "context"
 type Vkn interface {
 	// GetRecipientData fetches the recipient data for a given VKN.
 	GetRecipient(ctx context.Context, vkn string) (*Recipient, error)
+
+	// Login logs in to the VKN service.
 	Login(ctx context.Context) error
+
+	// Logout logs out from the VKN service.
+	Logout(ctx context.Context) error
 }
 
 // Config holds the configuration details for the VKN service.
