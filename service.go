@@ -2,8 +2,9 @@ package vkn
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -23,7 +24,7 @@ func New(cnf Config) Vkn {
 	}
 }
 
-func (s *srv) login() error {
+func (s *srv) Login(ctx context.Context) error {
 	data := url.Values{}
 	data.Set("assoscmd", "anologin")
 	data.Set("rtype", "json")
@@ -32,41 +33,37 @@ func (s *srv) login() error {
 	data.Set("sifre2", s.cnf.Password)
 	data.Set("parola", "1")
 	client := &http.Client{}
-	r, _ := http.NewRequest("POST", "https://earsivportal.efatura.gov.tr/earsiv-services/assos-login", bytes.NewBufferString(data.Encode()))
+	r, _ := http.NewRequestWithContext(ctx, "POST", "https://earsivportal.efatura.gov.tr/earsiv-services/assos-login", bytes.NewBufferString(data.Encode()))
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
 	resp, err := client.Do(r)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
 	var result loginResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return err
 	}
-
 	if result.Token == "" {
-		return fmt.Errorf("Token not found")
+		return errors.New("token not found")
 	}
 	s.token = result.Token
 	return nil
 }
 
-func (s *srv) checkLogin() error {
+func (s *srv) checkLogin(ctx context.Context) error {
 	if s.token == "" {
-		return s.login()
+		return s.Login(ctx)
 	}
 	return nil
 }
 
-func (s *srv) GetRecipient(vkn string) (*GetRecipientResponse, error) {
-	err := s.checkLogin()
+func (s *srv) GetRecipient(ctx context.Context, vkn string) (*Recipient, error) {
+	err := s.checkLogin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -81,24 +78,20 @@ func (s *srv) GetRecipient(vkn string) (*GetRecipientResponse, error) {
 	data.Set("token", s.token)
 	data.Set("jp", `{"vknTcknn":"`+vkn+`"}`)
 	client := &http.Client{}
-	r, _ := http.NewRequest("POST", "https://earsivportal.efatura.gov.tr/earsiv-services/dispatch", bytes.NewBufferString(data.Encode()))
+	r, _ := http.NewRequestWithContext(ctx, "POST", "https://earsivportal.efatura.gov.tr/earsiv-services/dispatch", bytes.NewBufferString(data.Encode()))
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
 	resp, err := client.Do(r)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-
 	var result *GetRecipientResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
 	}
-
-	return result, nil
+	return result.Data, nil
 }

@@ -1,9 +1,12 @@
 package vkn
 
+import "context"
+
 // Vkn represents the main interface for querying recipient data.
 type Vkn interface {
 	// GetRecipientData fetches the recipient data for a given VKN.
-	GetRecipient(vkn string) (*GetRecipientResponse, error)
+	GetRecipient(ctx context.Context, vkn string) (*Recipient, error)
+	Login(ctx context.Context) error
 }
 
 // Config holds the configuration details for the VKN service.

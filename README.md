@@ -29,12 +29,12 @@ func main() {
     }
 
     client := vkn.New(config)
-    data, err := client.GetRecipient("your-recipients-vkn-or-tck")
+    data, err := client.GetRecipient(context.Background(), "your-recipients-vkn-or-tck")
     if err != nil {
         fmt.Println("Error:", err)
         return
     }
-    fmt.Println(data)
+    fmt.Println(data) // {FirstName: "John", LastName: "Doe", Title: "Company Name", TaxOffice: "Tax Office Name"}
 }
 ```
 
